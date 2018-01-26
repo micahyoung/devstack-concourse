@@ -13,18 +13,18 @@ if ! [ -d opsfiles ]; then
 fi
 
 source ./state/env.sh
-: ${CONCOURSE_DEPLOYMENT_NAME:?"!"}
-: ${CONCOURSE_USERNAME:?"!"}
-: ${CONCOURSE_PASSWORD:?"!"}
-: ${OPENSTACK_HOST:?"!"}
 : ${PRIVATE_NETWORK_UUID:?"!"}
-: ${CONCOURSE_FLOATING_IP:?"!"}
+: ${PRIVATE_NETWORK_NAME:?"!"}
+: ${PUBLIC_IP:?"!"}
+: ${CONCOURSE_DEPLOYMENT_NAME:?"!"}
 : ${PRIVATE_CIDR:?"!"}
 : ${PRIVATE_GATEWAY_IP:?"!"}
 : ${PRIVATE_IP:?"!"}
+: ${OPENSTACK_HOST:?"!"}
 : ${OPENSTACK_USERNAME:?"!"}
 : ${OPENSTACK_PASSWORD:?"!"}
 : ${OPENSTACK_PROJECT:?"!"}
+: ${OPENSTACK_DOMAIN:?"!"}
 
 export OS_PROJECT_NAME=$OPENSTACK_PROJECT
 export OS_USERNAME=$OPENSTACK_USERNAME
@@ -214,19 +214,20 @@ bosh create-env state/concourse-manifest.yml \
   -v internal_cidr=$PRIVATE_CIDR \
   -v internal_gw=$PRIVATE_GATEWAY_IP \
   -v internal_ip=$PRIVATE_IP \
+  -v web_ip=$PUBLIC_IP \
   -v net_id=$PRIVATE_NETWORK_UUID \
+  -v network_name=$PRIVATE_NETWORK_NAME \
   -v openstack_password=$OPENSTACK_PASSWORD \
   -v openstack_project=$OPENSTACK_PROJECT \
   -v openstack_tenant=$OPENSTACK_PROJECT \
   -v openstack_username=$OPENSTACK_USERNAME \
-  -v openstack_domain=demo \
+  -v openstack_domain=$OPENSTACK_DOMAIN \
   -v private_key=bosh.pem \
   -v region=RegionOne \
   -v vm_type=m1.medium \
   -v concourse_version=3.8.0 \
   -v deployment_name=$CONCOURSE_DEPLOYMENT_NAME \
   -v garden_runc_version=1.9.0 \
-  -v network_name=private \
   -v postgres_password=password \
   -v token_signing_key='{
        private_key: "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0sx3a3Lhz6/u6mA5DoHen/XnctAPxBtsFlI3je/cdLjM60G9\nL0Fyj2dEyrz/7QWRFL8Rvk2gyOPDUB1QbmZ/0FFXPhNOfaLraqDSi60CqG4ZKbmo\neI9OTGgJZGLSKYfs/P1oZGQaPaUBtqqE9DgQu3TNshCkp5gzbu5vk5ZSE1cLTlq7\ni7smx80W9hRhuLjeis7QJpJksNvvaAKawxXELLAe8F23h19pje4++mDftwM9FzIq\n98WQ0rNTvjuxjjys39KDYiV8bADNftRbHSCqS723dfdNOdfj26WmkmhfxkIg8aAF\nV+bzSwSZ8ZkwA/9Wu4RaJTKHzokFZ4fFTdW+2QIDAQABAoIBAQCn2iopRAQtFWF/\n/XjRZXY5F1zh3mz/cfqCV5tnCR0ZUGHT3rffHhUzvT5Y1WBQgwNAatidGUEzVbGb\nZIw8LKAP6AU5J7RzdDxS3pZopC4eofSldfGBdlMZoioAZnQEn/iEhuAOOGtwtKiF\npIhT0yT3r41vAbOqxBYIehIcijD2tgF2qvj1Jhpoqr1whShppbZeWG6//VKSEXAe\na8t5rhsAA+nBOmMV7+rWvVaO65BTtUdt7uLhNWfFKigMyKv6oz93k6IjK8NmlQWM\nM2KfdJQL32S8xMmrcWSAlxmrl0QvxhwpIfLG3dOVEFbLFRkKZMVUqFpmFj6fSa3I\ngpSal6wBAoGBANtAHL0QGOcLeupqWbJGu70a6V5msuPQqQpH0grRFcDSbfvbIMfn\nb0s/J4Tf7QVj1bIi/O5cky8b8TBzUT0TkoNZqJ+ysSWflaUqMqemf7L8cRzMIZ2s\npvYpbrHuMXo+AQETTvTSDVF535Yk9e7lM1lnE4emmZ3Tu1yGaYLkI0SBAoGBAPYh\nshts76017kF3jy18hoR3djLzVm1/JBgFtGRCJnNCUwDy7WoRSs4LKAJJz5O1BcMt\nHxf6+ku5XlY33R9ngJEgdvLGqdeGeh56oEO5T1gEW9fKppgx2Rz6BS6QTYW+rQnq\nIP1oEy7EEkzzMQk/a4+iEaDaM6iOQVB4ItS2Y+5ZAoGACKvgdxnL4ldx5ROPuJ1T\nj4cg87rcGGaISP/OLt9WHOo1r2BbS4y7uh4lUfwJQ81PBlyb5FGFALf6MhBdhizf\n/pHtOWO33eUR5hZlKnxLUKjrUFhCfBn4AIRi/GaPTmZlY8V/ue8U18QaM7YChBBM\nl5ycCSFtsfBN2Lr4MVUUkAECgYEAu6gfMnfRGR/IQtPULxsFOJQYY2pSF/Pa4hHf\nYp1o0XHc9RlCWB9NCGFLJMt/3x8igJezYEYzdW6kdVnsVphEVuIIrrs3HSLjkr9t\n15S+4N2Z5KIWeG1xGn2pW8IbyQAC0E9Yzbv+/CXzygWU+ncHHCC2DgyvXDDxrVeb\nPtC8yikCgYBpVns2/oFLkfm96zRjGBN/XT5GYaQRmBkgu8bDzDfMMzm8RL8odNuF\nlrCG7+1RJYFz1cTojq3NjiRVX5ePpUzpbKQXSFuwa8BHGcwZW0A8zB6vbu5cazcq\nF0jS9ggZibTgY5w+Zykf4pKXV2PsYeCv7I60ODkB5nn5H26C/KB+mQ==\n-----END RSA PRIVATE KEY-----\n",
@@ -237,7 +238,6 @@ bosh create-env state/concourse-manifest.yml \
        public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxXKR0w6tUaaJffRnJeani6qCaqJtrsKEbDu8J6MNwpsohkwL7XeylDFxcwlRX4wOcOXkNMQssGCUiIu/s9akA3Nqpp0WeDQ0d4G0RsvA7mrKm7ok1DhMEv02wRkZ7nbgSSATV70Ndlem5znkm6gW4jJR3Df3KvkBMsj7kkTRhYQE/hg3TbtZUaYw6OdYM8LHOnz2D3JmDGX2doap+NzJe881FOUfp8cAIStePv8gb51yCfyBH0hIxfVl0I9jUbYNwuqavzzqvcywn/Cb1SzDw+H9iK8h8Dk4bKfua8ahh2aD77/mtK/nluvN+GgXQxZfu+vco+/LSXbcrWwaz8pDX",
        public_key_fingerprint: "58:cb:1a:43:28:83:7e:c3:32:11:f1:b6:a9:98:3d:0e"
        }' \
-  -v web_ip=10.0.0.200 \
   -v worker_key='{
        private_key: "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEAywz7HF45lYG/I6QPpHyQtCQXTniG8GOQ3MU1KOFTqR0APVXj\nwoE08MVxmyXNIibLmYYPFzOZFhy6KRvO8gOveZxaFIFZCtUa4/jDNkpad69NJJ8G\ntPcqxPZOuHnhyABWSmhJcwrHK0SWmCuOlAoWs4qftxADgBtRlfeQys9ETslTYpdE\nmi6GhOwL1VurCl6PV77nc2NROcYNnxdVL9js9Sm8+/i6wW8wDdMPVIrPq8/LJBlK\nqJspcu1JFT8kvft1f/TUMkEpj3j4Brd7ID0cABXn798UIq8DlVH3CWBZx5SPeSAt\nDKHOoyLdPz+cvemLRBTEuD+6f1i4RW8UiGgS9wIDAQABAoIBAQCIp6zc88FXkKHe\nT81DS55rzpps8osGgEv/eS4E3FlcyKrfnM2TmzfRD2EdJLzBTlDaezHu0IgoLJ9R\niWim0ronY4XwpPkTZEcbxNFE2Ze3UyDdE7YE1xBOzOJAH69H1oo8u6ErLsbKpPeh\nZDcqBPwwS4ygPMPOVRR8lMg65nG3f26LG2NkG7RnE6sVvYZjKKrs9PboaL8AMNNP\n39WBgEUBD5VJXcU6+lyaKX5E06iiCML7uWM8OyyLKC9ppmu3l5MC9P/rjbfRQZaH\ntUVg0fZBB3pRVNibu1tPgiLeffBuzdQHmr5XInsIp32ZF4xFL74VvoRaMieZwKFg\nXL9PjtjJAoGBAN7t7qp+EWoXB/d2a5hVGGUfbTlOp57/RGRd/vqEJZ8Owe49JxKJ\nzoJUAwmBW72MmsDfTZTgurk806E0opPSxmBvfI21Ewb4QUvmR7allkuT7YBVSDeV\nsJvC3igyhc5U1Nr2EBe5/Onil3AYXtWXGvXwKgAdXDgOoCNjaCl3F8PTAoGBAOks\nICU99mUb63AtXhUnSHZ81LayTtmjdmMA6zDGZoH72pqu5ejqrIP63TCO9R1QXYd4\npC3GuaI2IXzqqM4DJzrzQIim8slQC69A3XVDwTjj0+DIRDBRSB9twUjF9YuxiSXZ\n7YU4W8jYa2Xnrri36hTXIElnXPGDZylPdMkK29HNAoGAWcLL2nIwaNslJgrUf92j\nmPPycqSs8WQvEYqXZB9ZVpYGl/qfhONf9zIElwsy+TtoBEjlYBCsnnFTdRFQdNzl\na2b4a8aBBslm4Tyzm2NJBN1nP8kW7uqi1dS8xsqw/cdCfXeeOy90GmhWOZhWdwIE\npQoynyEzRI7/A8C+7BM7ymkCgYEAh5rT7xTEETVVjV21E5RO/inHA6FbXhNErHtC\nTJF12C6Ciechan3garkgnjblsnCklD7DLKQgHYhhnWZTWcxXql8Brvd4xz84LGoK\n4UHQQ6er91RA4+DBkxWfjRUjomRToKHHEu0d5AaJHzDIWkELb6dU7ZuhYAvNmSbO\ngoVAJhkCgYBpVlxtpSbhdx3OIK4EHdN9XhIabzi25fBqZotuY100ZykJ9ooNprxt\nGc5VV6uouMeXgTTsB+hsWczoP4x2aywB5YCmxJqZS730J0cl4abxENDOvWdNwao2\nlSD4KeGyMJ/DI+pHeIlI3XIPptNLJJwx/7hiBKC8QTUsSeRU9N2kfg==\n-----END RSA PRIVATE KEY-----\n",
        public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDLDPscXjmVgb8jpA+kfJC0JBdOeIbwY5DcxTUo4VOpHQA9VePCgTTwxXGbJc0iJsuZhg8XM5kWHLopG87yA695nFoUgVkK1Rrj+MM2Slp3r00knwa09yrE9k64eeHIAFZKaElzCscrRJaYK46UChazip+3EAOAG1GV95DKz0ROyVNil0SaLoaE7AvVW6sKXo9XvudzY1E5xg2fF1Uv2Oz1Kbz7+LrBbzAN0w9Uis+rz8skGUqomyly7UkVPyS9+3V/9NQyQSmPePgGt3sgPRwAFefv3xQirwOVUfcJYFnHlI95IC0Moc6jIt0/P5y96YtEFMS4P7p/WLhFbxSIaBL3",
