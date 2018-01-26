@@ -113,7 +113,7 @@ cat > opsfiles/concourse-init-opsfile.yml <<EOF
   - name: default
     subnets:
     - dns:
-      - 8.8.8.8
+      - 10.0.0.2
       gateway: 10.0.0.1
       range: 10.0.0.0/24
       static_ips: ((web_ip))
