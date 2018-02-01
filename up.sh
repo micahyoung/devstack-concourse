@@ -197,7 +197,7 @@ if ! grep -q concourse <(openstack flavor list -c Name -f value); then
     --public \
     --vcpus 2 \
     --ram 8192 \
-    --disk 30 \
+    --disk 50 \
   ;
 fi
 
@@ -243,61 +243,4 @@ bosh create-env state/concourse-manifest.yml \
        public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDLDPscXjmVgb8jpA+kfJC0JBdOeIbwY5DcxTUo4VOpHQA9VePCgTTwxXGbJc0iJsuZhg8XM5kWHLopG87yA695nFoUgVkK1Rrj+MM2Slp3r00knwa09yrE9k64eeHIAFZKaElzCscrRJaYK46UChazip+3EAOAG1GV95DKz0ROyVNil0SaLoaE7AvVW6sKXo9XvudzY1E5xg2fF1Uv2Oz1Kbz7+LrBbzAN0w9Uis+rz8skGUqomyly7UkVPyS9+3V/9NQyQSmPePgGt3sgPRwAFefv3xQirwOVUfcJYFnHlI95IC0Moc6jIt0/P5y96YtEFMS4P7p/WLhFbxSIaBL3",
        public_key_fingerprint: "df:49:f6:e8:0c:b9:0c:c2:39:97:a5:02:06:1a:f6:c8"
        }' \
-;
-exit
-#bosh create-env bosh-deployment/bosh.yml \
-#  --state state/bosh-deployment-state.json \
-#  -o bosh-deployment/openstack/cpi.yml \
-#  -o bosh-deployment/openstack/keystone-v2.yml \
-#  -o bosh-deployment/uaa.yml \
-#  -o bosh-deployment/credhub.yml \
-#  -o opsfiles/bosh-disk-pools.yml \
-#  -v admin_password=admin \
-#  -v api_key=password \
-#  -v auth_url=http://$OPENSTACK_IP:5000/v2.0 \
-#  -v az=nova \
-#  -v default_key_name=bosh \
-#  -v default_security_groups=[bosh] \
-#  -v director_name=bosh \
-#  -v internal_cidr=$PRIVATE_CIDR \
-#  -v internal_gw=$PRIVATE_GATEWAY_IP \
-#  -v internal_ip=$PRIVATE_IP \
-#  -v net_id=$PRIVATE_NETWORK_UUID \
-#  -v openstack_domain=nova \
-#  -v openstack_password=password \
-#  -v openstack_project=demo \
-#  -v openstack_tenant=demo \
-#  -v openstack_username=admin \
-#  -v private_key=../state/bosh.pem \
-#  -v region=RegionOne \
-#  --vars-store state/bosh-creds.yml \
-#  --tty \
-#;
-
-bosh alias-env --ca-cert <(bosh interpolate state/bosh-creds.yml --path /director_ssl/ca) -e $PRIVATE_IP bosh
-bosh log-in -e bosh --client admin --client-secret admin
-
-CF_STEMCELL_VERSION=$(bin/bosh int cf-deployment/cf-deployment.yml --path /stemcells/alias=default/version)
-bosh upload-stemcell -e bosh \
-  --name=bosh-openstack-kvm-ubuntu-trusty-go_agent \
-  --version=$CF_STEMCELL_VERSION \
-  https://bosh.io/d/stemcells/bosh-openstack-kvm-ubuntu-trusty-go_agent?v=$CF_STEMCELL_VERSION
-
-bosh update-cloud-config -e bosh --non-interactive state/cloud-config.yml
-
-# CF
-bosh deploy -e bosh  -d cf cf-deployment/cf-deployment.yml \
-  -o cf-deployment/operations/scale-to-one-az.yml \
-  -o cf-deployment/operations/test/alter-ssh-proxy-redirect-uri.yml \
-  -o opsfiles/cf-cc-disk-quota.yml \
-  -v system_domain=$SYSTEM_DOMAIN \
-  --vars-store state/cf-creds.yml \
-  -n \
-;
-
-
-# Concourse
-bosh deploy -e bosh -d bosh-concourse bosh-concourse-deployment.yml \
-  --vars-store state/concourse-creds.yml \
-  -n \
 ;
