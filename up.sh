@@ -202,6 +202,13 @@ if ! grep -q concourse <(openstack flavor list -c Name -f value); then
   ;
 fi
 
+if ! grep -q concourse <(openstack keypair list -c Name -f value); then
+  cat > id_bosh_rsa.pub <<EOF2
+  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDjiROOp2ClfiN0/9k+le/jMqHTI0/akgggCZ2hDf9aGhNFaVwdnU/yrKtCIobYv6LPX/uwQBwXUgWQ5ezlffe79RWJs7OQYEsN8aOSlqcBqfap0f2K0sQpU9jYvJuUdOw/pzpHAGo5yFlW8oCSJke/DU3LGqJkw/CVOCq1pohczVgYiBia0Un4l9CceT22bb2ZxMfy26jw0VtX4cC2UtVyfXI9xjaqbzFCJwQcIe8ECom0e7RLF0aglCSs+gwoRg/HK7NjnFPLVL0CuB4aBD+B6eLtI0LxB1ixcsnRi/UXeLFKfs+jwysUEgcN1H5pY8N/X44yNQ+OkMXZ/7PwpH/d vcap@bosh-init 
+EOF2
+  openstack keypair create --public-key=id_bosh_rsa.pub concourse
+fi
+
 if ! grep -q concourse <(openstack security group list -c Name -f value); then
   openstack security group create concourse
   openstack security group rule create concourse --protocol=tcp --dst-port=22
@@ -216,9 +223,9 @@ bosh create-env state/concourse-manifest.yml \
   -v api_key=password \
   -v auth_url=http://$OPENSTACK_HOST/v2.0 \
   -v az=nova \
-  -v default_key_name=bosh \
-  -v default_security_groups=[bosh] \
-  -v director_name=bosh \
+  -v default_key_name=concourse \
+  -v default_security_groups=[concourse] \
+  -v director_name=concourse \
   -v internal_cidr=$PRIVATE_CIDR \
   -v internal_gw=$PRIVATE_GATEWAY_IP \
   -v internal_ip=$PRIVATE_IP \
