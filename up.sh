@@ -209,9 +209,10 @@ fi
 
 if ! grep -q concourse <(openstack security group list -c Name -f value); then
   openstack security group create concourse
-  openstack security group rule create concourse --protocol=tcp --dst-port=22
-  openstack security group rule create concourse --protocol=tcp --dst-port=8080
-  openstack security group rule create concourse --protocol=icmp
+  openstack security group rule create concourse --protocol=tcp --dst-port=8080   # web
+  openstack security group rule create concourse --protocol=tcp --dst-port=6868   # bosh create-env
+  openstack security group rule create concourse --protocol=tcp --dst-port=22     # debugging
+  openstack security group rule create concourse --protocol=icmp                  # debugging
 fi
 
 bosh create-env state/concourse-manifest.yml \
