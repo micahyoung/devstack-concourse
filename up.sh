@@ -13,7 +13,6 @@ if ! [ -d opsfiles ]; then
 fi
 
 source ./state/env.sh
-: ${PRIVATE_NETWORK_UUID:?"!"}
 : ${PRIVATE_NETWORK_NAME:?"!"}
 : ${PUBLIC_IP:?"!"}
 : ${CONCOURSE_DEPLOYMENT_NAME:?"!"}
@@ -25,7 +24,6 @@ source ./state/env.sh
 : ${OPENSTACK_PASSWORD:?"!"}
 : ${OPENSTACK_PROJECT:?"!"}
 : ${OPENSTACK_DOMAIN:?"!"}
-PRIVATE_NETWORK_NAME=private
 
 export OS_PROJECT_NAME=$OPENSTACK_PROJECT
 export OS_USERNAME=$OPENSTACK_USERNAME
@@ -33,8 +31,7 @@ export OS_PASSWORD=$OPENSTACK_PASSWORD
 export OS_AUTH_URL=http://$OPENSTACK_HOST/v2.0
 set -x
 
-PRIVATE_NETWORK_UUID=$(openstack network show $PRIVATE_NETWORK_NAME -c id)
-exit
+PRIVATE_NETWORK_UUID=$(openstack network show $PRIVATE_NETWORK_NAME -c id -f value)
 
 mkdir -p bin
 PATH=$PATH:$(pwd)/bin
