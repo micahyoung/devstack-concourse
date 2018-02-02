@@ -202,6 +202,13 @@ if ! grep -q concourse <(openstack flavor list -c Name -f value); then
   ;
 fi
 
+if ! grep -q concourse <(openstack security group list -c Name -f value); then
+  openstack security group create concourse
+  openstack security group rule create concourse --protocol=tcp --dst-port=22
+  openstack security group rule create concourse --protocol=tcp --dst-port=8080
+  openstack security group rule create bosh --protocol=icmp
+fi
+
 bosh create-env state/concourse-manifest.yml \
   --state state/concourse-state.json \
   -o opsfiles/concourse-init-opsfile.yml \
