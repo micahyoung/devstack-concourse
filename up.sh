@@ -29,7 +29,7 @@ export OS_PASSWORD=$OPENSTACK_PASSWORD
 export OS_AUTH_URL=http://$OPENSTACK_HOST/v2.0
 set -x
 
-PRIVATE_NETWORK_UUID=$(openstack network show $NETWORK_NAME -c id -f value)
+NETWORK_UUID=$(openstack network show $NETWORK_NAME -c id -f value)
 
 mkdir -p bin
 PATH=$PATH:$(pwd)/bin
@@ -222,8 +222,8 @@ bosh create-env state/concourse-manifest.yml \
   -v default_key_name=concourse \
   -v default_security_groups=[concourse] \
   -v director_name=concourse \
-  -v web_ip=$PRIVATE_IP \
-  -v net_id=$PRIVATE_NETWORK_UUID \
+  -v web_ip=$CONCOURSE_IP \
+  -v net_id=$NETWORK_UUID \
   -v network_name=$NETWORK_NAME \
   -v openstack_password=$OPENSTACK_PASSWORD \
   -v openstack_project=$OPENSTACK_PROJECT \
