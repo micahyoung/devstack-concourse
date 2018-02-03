@@ -13,13 +13,10 @@ if ! [ -d opsfiles ]; then
 fi
 
 source ./state/env.sh
-: ${PRIVATE_NETWORK_NAME:?"!"}
-: ${PUBLIC_IP:?"!"}
+: ${NETWORK_NAME:?"!"}
+: ${CONCOURSE_IP:?"!"}
 : ${CONCOURSE_DEPLOYMENT_NAME:?"!"}
 : ${CONCOURSE_PUBKEY:?"!"}
-: ${PRIVATE_CIDR:?"!"}
-: ${PRIVATE_GATEWAY_IP:?"!"}
-: ${PRIVATE_IP:?"!"}
 : ${OPENSTACK_HOST:?"!"}
 : ${OPENSTACK_USERNAME:?"!"}
 : ${OPENSTACK_PASSWORD:?"!"}
@@ -32,7 +29,7 @@ export OS_PASSWORD=$OPENSTACK_PASSWORD
 export OS_AUTH_URL=http://$OPENSTACK_HOST/v2.0
 set -x
 
-PRIVATE_NETWORK_UUID=$(openstack network show $PRIVATE_NETWORK_NAME -c id -f value)
+PRIVATE_NETWORK_UUID=$(openstack network show $NETWORK_NAME -c id -f value)
 
 mkdir -p bin
 PATH=$PATH:$(pwd)/bin
@@ -225,12 +222,9 @@ bosh create-env state/concourse-manifest.yml \
   -v default_key_name=concourse \
   -v default_security_groups=[concourse] \
   -v director_name=concourse \
-  -v internal_cidr=$PRIVATE_CIDR \
-  -v internal_gw=$PRIVATE_GATEWAY_IP \
-  -v internal_ip=$PRIVATE_IP \
-  -v web_ip=$PUBLIC_IP \
+  -v web_ip=$PRIVATE_IP \
   -v net_id=$PRIVATE_NETWORK_UUID \
-  -v network_name=$PRIVATE_NETWORK_NAME \
+  -v network_name=$NETWORK_NAME \
   -v openstack_password=$OPENSTACK_PASSWORD \
   -v openstack_project=$OPENSTACK_PROJECT \
   -v openstack_tenant=$OPENSTACK_PROJECT \
