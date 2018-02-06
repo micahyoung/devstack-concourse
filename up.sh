@@ -196,10 +196,10 @@ if ! grep -q concourse <(openstack keypair list -c Name -f value); then
   openstack keypair create --public-key=state/bosh.pem.pub concourse
 fi
 
-if ! dpkg -l build-essential ruby; then
+if ! dpkg -l build-essential ruby jq; then
   DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy update
   DEBIAN_FRONTEND=noninteractive sudo apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -qqy \
-    build-essential zlibc zlib1g-dev ruby ruby-dev openssl libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev libsqlite3-dev sqlite3
+    build-essential zlibc zlib1g-dev ruby ruby-dev openssl libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev libsqlite3-dev sqlite3 jq
 fi
 
 bosh create-env state/concourse-manifest.yml \
@@ -227,27 +227,27 @@ bosh create-env state/concourse-manifest.yml \
   -v deployment_name=$CONCOURSE_DEPLOYMENT_NAME \
   -v garden_runc_version=1.9.0 \
   -v postgres_password=password \
-  -v token_signing_key=$(
+  -v token_signing_key="$(
        jq -n \
          --arg private_key "$(cat state/token_signing_key)" \
          --arg public_key "$(cat state/token_signing_key.pub.pem)" \
          '{private_key: $private_key, public_key: $public_key}' \
        ;
-     ) \
-  -v tsa_host_key=$(
+     )" \
+  -v tsa_host_key="$(
        jq -n \
          --arg private_key "$(cat state/tsa_host_key)" \
          --arg public_key "$(cat state/tsa_host_key.pub)" \
          --arg fingerprint "$(cat state/tsa_host_key.fingerprint)" \
          '{private_key: $private_key, public_key: $public_key, public_key_fingerprint: $fingerprint}' \
        ;
-     ) \
-  -v worker_key=$(
+     )" \
+  -v worker_key="$(
        jq -n \
          --arg private_key "$(cat state/worker_key)" \
          --arg public_key "$(cat state/worker_key.pub)" \
          --arg fingerprint "$(cat state/worker_key.fingerprint)" \
          '{private_key: $private_key, public_key: $public_key, public_key_fingerprint: $fingerprint}' \
        ;
-     ) \
+     )" \
 ;
