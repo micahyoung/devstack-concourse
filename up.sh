@@ -196,10 +196,11 @@ if ! grep -q concourse <(openstack keypair list -c Name -f value); then
   openstack keypair create --public-key=state/bosh.pem.pub concourse
 fi
 
-if ! dpkg -l build-essential ruby jq; then
+if ! dpkg -l build-essential ruby jq tinyproxy; then
   DEBIAN_FRONTEND=noninteractive sudo apt-get -qqy update
   DEBIAN_FRONTEND=noninteractive sudo apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -qqy \
-    build-essential zlibc zlib1g-dev ruby ruby-dev openssl libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev libsqlite3-dev sqlite3 jq
+    build-essential zlibc zlib1g-dev ruby ruby-dev openssl libxslt-dev libxml2-dev libssl-dev libreadline6 libreadline6-dev libyaml-dev libsqlite3-dev sqlite3 jq tinyproxy
+  echo "ConnectPort 8080" | sudo tee -a /etc/tinyproxy.conf
 fi
 
 bosh create-env state/concourse-manifest.yml \
